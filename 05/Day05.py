@@ -1,4 +1,5 @@
 import fileinput
+import copy
 
 INPUT = ''.join(fileinput.input())
 BOARD, MOVES = INPUT.split('\n\n')
@@ -6,7 +7,6 @@ BOARD = BOARD.splitlines()
 BOTTOM = BOARD[-1]
 NUM_OF_STACKS = max(int(x) for x in BOTTOM.split())
 STACKS = [[] for _ in range(NUM_OF_STACKS)]
-PART_1 = ''
 
 
 for line in BOARD[::-1]:
@@ -14,22 +14,32 @@ for line in BOARD[::-1]:
         if crate.isupper():
             STACKS[i].append(crate)
 
-def supply_stacks(data):
-    global PART_1
+def supply_stacks(data, part_two = False):
+    stack = copy.deepcopy(STACKS)
     for line in data.splitlines():
         x, y, z = parse_line(line)
-        for _ in range(x):
-            crate_to_move = STACKS[y - 1].pop()
-            STACKS[z - 1].append(crate_to_move)
-    
-    for i in range(len(STACKS)):
-        PART_1 += STACKS[i][-1]
+        crates_to_move = []
+
+        if not part_two:
+            for _ in range(x):
+                crate_to_move = stack[y - 1].pop()
+                stack[z - 1].append(crate_to_move)
+        
+        else:
+            for _ in range(x):
+                crate_to_move = stack[y - 1].pop()
+                crates_to_move.append(crate_to_move)
+            crates_to_move.reverse()
+            stack[z - 1].extend(crates_to_move)
+    return ''.join(s[-1] for s in stack if s)
+
 
 
 def parse_line(line):
     numbers = [int(part) for part in line.split() if part.isdigit()]
     return numbers
 
-supply_stacks(MOVES)
 
-print(f"Solution to part 1 is: {PART_1}")
+
+print(f"Solution to part 1 is: {supply_stacks(MOVES)}")
+print(f"Solution to part 2 is: {supply_stacks(MOVES, True)}")
